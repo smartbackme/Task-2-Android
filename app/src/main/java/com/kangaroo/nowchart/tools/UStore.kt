@@ -1,8 +1,10 @@
 package com.kangaroo.nowchart.tools
 
 import android.graphics.Path
+import com.github.mikephil.charting.data.BarEntry
 import com.jeremyliao.liveeventbus.LiveEventBus
 import com.kangaroo.nowchart.data.model.*
+import com.kangaroo.nowchart.event.ClickEvent
 import com.kangaroo.nowchart.event.RenEvent
 import com.kangraoo.basektlib.app.SApplication
 import com.kangraoo.basektlib.tools.HString
@@ -23,6 +25,7 @@ const val DATA:String = "data"
 const val MESSAGE:String = "message"
 const val HOTIM:String = "hotim"
 const val toRen = "TO_REN"
+const val toClick = "TO_CLICK"
 
 object UStore {
 
@@ -53,6 +56,31 @@ object UStore {
             list.add(it)
         }
         return list
+    }
+
+    var list: ArrayList<BarEntry> = ArrayList()
+
+    fun clearClick() {
+        list.clear()
+        listUser.clear()
+        click(UserClick(getUser()!!.name,1))
+    }
+
+    var listUser: ArrayList<String> = ArrayList()
+
+    fun click(user : UserClick){
+        if(!listUser.contains(user.name)){
+            listUser.add(user.name)
+            list.add(BarEntry(list.size.toFloat(),user.click.toFloat()))
+        }else{
+            list.forEach {
+                if(listUser[it.x.toInt()]==user.name){
+                    it.y = user.click.toFloat()
+                }
+            }
+        }
+        LiveEventBus.get<ClickEvent>(toClick,ClickEvent::class.java).post(ClickEvent())
+
     }
 
 }

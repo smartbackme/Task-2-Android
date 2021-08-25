@@ -22,3 +22,8 @@ data class UserModel(val name:String,val pass:String = PASSWORD,var token:String
 @JsonClass(generateAdapter = true)
 data class UserList(var username:String? = null,var extusername:String? = null,val user:Set<User>):Parcelable
 
+
+@Parcelize
+@JsonClass(generateAdapter = true)
+data class UserClick(val name:String,val click: Int):Parcelable
+

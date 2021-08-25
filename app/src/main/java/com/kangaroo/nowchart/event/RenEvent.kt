@@ -6,3 +6,5 @@ package com.kangaroo.nowchart.event
  * 描述：
  */
 class RenEvent()
+
+class ClickEvent()

@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit
 object MqttUtil {
     var move = "MOVE"
     var clear = "CLEAR"
+    var click = "CLICK"
 
 
 
@@ -104,7 +105,7 @@ object MqttUtil {
 
     fun unsubscribe() {
         try {
-            mqttClient?.unsubscribe(arrayOf(move,clear));
+            mqttClient?.unsubscribe(arrayOf(move,clear,click));
         } catch (e: MqttException) {
             e.printStackTrace();
         }
@@ -161,8 +162,15 @@ object MqttUtil {
                 when(s){
 
                     clear->{
+                        UStore.clearClick()
+                    }
+                    click ->{
                         if(user!=null&&st != user.name){
+                            UStore.putUser(User(user.name))
                         }
+                        var st = String(mqttMessage.payload)
+                        var data = HJson.fromJson<UserClick>(st)
+                        UStore.click(data!!)
                     }
                 }
 //                when (s) {
@@ -254,8 +262,8 @@ object MqttUtil {
                 Log.d("connect", "connect success")
                 executorService.submit {
                     try {
-                        val topicFilter = arrayOf<String>(move,clear)
-                        val qos = intArrayOf(qosLevel,qosLevel)
+                        val topicFilter = arrayOf<String>(move,clear,click)
+                        val qos = intArrayOf(qosLevel,qosLevel,qosLevel)
                         mqttClient?.subscribe(topicFilter, qos)
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -265,3 +273,5 @@ object MqttUtil {
         })
     }
 }
+
+

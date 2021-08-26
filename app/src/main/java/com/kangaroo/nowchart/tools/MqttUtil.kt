@@ -165,9 +165,9 @@ object MqttUtil {
                         UStore.clearClick()
                     }
                     click ->{
-                        if(user!=null&&st != user.name){
-                            UStore.putUser(User(user.name))
-                        }
+//                        if(user!=null&&st != user.name){
+//                            UStore.putUser(User(user.name))
+//                        }
                         var st = String(mqttMessage.payload)
                         var data = HJson.fromJson<UserClick>(st)
                         UStore.click(data!!)

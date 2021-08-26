@@ -63,7 +63,8 @@ object UStore {
     fun clearClick() {
         list.clear()
         listUser.clear()
-        click(UserClick(getUser()!!.name,1))
+        LiveEventBus.get<ClickEvent>(toClick,ClickEvent::class.java).post(ClickEvent())
+//        click(UserClick(getUser()!!.name,1))
     }
 
     var listUser: ArrayList<String> = ArrayList()

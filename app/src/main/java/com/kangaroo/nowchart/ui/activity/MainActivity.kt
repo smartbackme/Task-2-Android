@@ -1,7 +1,9 @@
 package com.kangaroo.nowchart.ui.activity
 
 import android.app.Activity
+import android.content.DialogInterface
 import android.os.Bundle
+import android.widget.EditText
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.mikephil.charting.components.AxisBase
@@ -35,6 +37,7 @@ import com.kangraoo.basektlib.tools.launcher.LibActivityLauncher
 import com.kangraoo.basektlib.tools.log.ULog
 import com.kangraoo.basektlib.tools.tip.Tip
 import com.kangraoo.basektlib.ui.BActivity
+import com.kangraoo.basektlib.widget.dialog.LibEditDialog
 import com.qdedu.baselibcommon.widget.toolsbar.CommonToolBarListener
 import com.qdedu.baselibcommon.widget.toolsbar.CommonToolBarOptions
 import kotlinx.android.synthetic.main.activity_main.*
@@ -84,7 +87,10 @@ class MainActivity : BActivity(), OnChartValueSelectedListener, IAxisValueFormat
         bar.setScaleEnabled(false)
         bar.setOnChartValueSelectedListener(this)
         val xAxis: XAxis = bar.getXAxis()
-        xAxis.setValueFormatter(this)
+        xAxis.valueFormatter = this
+        xAxis.granularity = 1f
+        bar.axisLeft.granularity = 1f
+        bar.axisLeft.axisMinimum = 0f
         launch {
             val user = UStore.getUser()
             showProgressingDialog("加载数据中")
@@ -108,7 +114,7 @@ class MainActivity : BActivity(), OnChartValueSelectedListener, IAxisValueFormat
 //                    listUser.add(user.name)
 //                    list.add(BarEntry(1.0f,1.0f))
 //                    barDataSet.notifyDataSetChanged()
-                    UStore.click(UserClick(user.name,1))
+//                    UStore.click(UserClick(user.name,1))
                 } else {
                     dismissProgressDialog()
                     showToastMsg(Tip.Error, "加载失败")
@@ -146,7 +152,7 @@ class MainActivity : BActivity(), OnChartValueSelectedListener, IAxisValueFormat
 
                 list.clear()
                 list.addAll(UStore.list)
-                val barDataSet = BarDataSet(list, "在线用户")
+                val barDataSet = BarDataSet(list, "线上立柱")
 
                 val barData = BarData(barDataSet)
                 bar.data = barData
@@ -159,7 +165,29 @@ class MainActivity : BActivity(), OnChartValueSelectedListener, IAxisValueFormat
         clear.setOnClickListener {
             MqttUtil.message(MqttUtil.clear,UStore.getUser()!!.name)
         }
+        create.setOnClickListener {
+            libEditDialog!!.show()
+        }
+        libEditDialog = LibEditDialog(visitActivity())
+        libEditDialog!!.title("新增立柱")
+        libEditDialog!!.content("立柱名称")
+        libEditDialog!!.inputHite("立柱名称")
+        libEditDialog!!.onLibDialogListener = (object : LibEditDialog.OnLibEditDialogListener {
+            override fun onSure(text: EditText) {
+                MqttUtil.message(MqttUtil.click,HJson.toJson(UserClick(text.text.toString(),1)))
+                libEditDialog!!.dismiss()
+                text.setText("")
+            }
+
+            override fun onShow() {
+            }
+
+            override fun onDismiss(dialog: DialogInterface) {
+            }
+
+        })
     }
+    var libEditDialog: LibEditDialog? = null
 
     override fun onDestroy() {
 //        MqttUtil.message(MqttUtil.DeRen, UStore.getUser()?.name?:"")
